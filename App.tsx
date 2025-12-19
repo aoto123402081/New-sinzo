@@ -1,17 +1,17 @@
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  collection, query, orderBy, onSnapshot, doc, getDocs, 
-  addDoc, deleteDoc, updateDoc, setDoc, getDoc, 
-  Timestamp, serverTimestamp, increment 
+  collection, query, orderBy, onSnapshot, doc, 
+  deleteDoc, updateDoc, setDoc, 
+  serverTimestamp, increment 
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { db } from './firebase';
-import { Thread, Post, Room, SortMode } from './types';
-import Header from './components/Header';
-import RoomSelector from './components/RoomSelector';
-import ThreadList from './components/ThreadList';
-import PostList from './components/PostList';
-import { CreateThreadModal, CreatePostModal, AdminModal, ImageModal, PasswordModal, OnlineUsersModal, CreateRoomModal } from './components/Modals';
+import { db } from './firebase.ts';
+import { Thread, Room, SortMode } from './types.ts';
+import Header from './components/Header.tsx';
+import RoomSelector from './components/RoomSelector.tsx';
+import ThreadList from './components/ThreadList.tsx';
+import PostList from './components/PostList.tsx';
+import { CreateThreadModal, CreatePostModal, AdminModal, ImageModal, PasswordModal, OnlineUsersModal, CreateRoomModal } from './components/Modals.tsx';
 
 const App: React.FC = () => {
   const [currentRoom, setCurrentRoom] = useState<string>('threads');
@@ -22,7 +22,6 @@ const App: React.FC = () => {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<SortMode>('new');
   
-  // Modals
   const [showCreateThread, setShowCreateThread] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
@@ -39,7 +38,6 @@ const App: React.FC = () => {
     return localStorage.getItem('userIcon') || '';
   });
 
-  // Listen for Rooms
   useEffect(() => {
     const q = query(collection(db, "rooms"), orderBy("created_at", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
@@ -48,7 +46,6 @@ const App: React.FC = () => {
     return () => unsub();
   }, []);
 
-  // Listen for Threads in Current Room
   useEffect(() => {
     const q = query(collection(db, currentRoom), orderBy("created_at", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
@@ -58,7 +55,6 @@ const App: React.FC = () => {
     return () => unsub();
   }, [currentRoom]);
 
-  // Online Count Heartbeat
   useEffect(() => {
     const onlineRef = doc(db, "online", nickName + Math.random().toString(36).slice(2));
     const heartbeat = () => {
@@ -78,7 +74,6 @@ const App: React.FC = () => {
           userSet.add(data.name || "名称未設定");
         }
       });
-      // セットを使用しているため重複は自動的に排除される
       setOnlineUsers(Array.from(userSet));
       setOnlineCount(userSet.size);
     });
@@ -173,7 +168,6 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Action Buttons */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-30">
         {!currentThread ? (
           <button 
@@ -194,7 +188,6 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Modals */}
       {showCreateThread && (
         <CreateThreadModal 
           currentRoom={currentRoom}

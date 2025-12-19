@@ -10,7 +10,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
         
-        /* ① 角丸・影・背景（見た目の土台） */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f5f6f8;
@@ -39,7 +38,6 @@
             border-radius: 10px;
         }
 
-        /* ② 部屋選択ボタン（押してるのが分かる） */
         .roomBtn {
             padding: 8px 14px;
             background: #ffffff;
@@ -53,21 +51,19 @@
             box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
         }
 
-        /* ③ スレッド一覧（カード化） */
         .threadTitle {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 6px;
         }
 
-        /* ④ 投稿表示（読みやすく & 背景色指定） */
         .post-card {
-            background-color: #1e88e5 !important; /* 指定色（青） */
+            background-color: #1e88e5 !important;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         .post-name {
-            color: #000000 !important; /* 投稿者名は黒色 */
+            color: #000000 !important;
             font-weight: 800;
             font-size: 13px;
         }
@@ -81,7 +77,6 @@
             text-decoration: underline;
         }
 
-        /* 入力欄の文字色視認性 */
         input, textarea, select {
             color: #1e293b !important;
             background-color: #ffffff !important;
@@ -90,14 +85,14 @@
             color: #94a3b8 !important;
         }
     </style>
-    <script>
+    <script crossorigin>
         /**
          * 画像をリサイズ・圧縮してBase64文字列に変換する
-         * ブラウザ専用API (FileReader, Image, Canvas) を使用するため、
-         * サーバーサイドエラーを防ぐためにこのindex.html内に定義します。
+         * ブラウザ専用APIを使用するため、index.html内に定義
          */
         window.processImage = (file, maxDim) => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
+                if (!file) return reject("No file provided");
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image();
@@ -128,8 +123,10 @@
                             resolve(e.target.result);
                         }
                     };
+                    img.onerror = reject;
                     img.src = e.target.result;
                 };
+                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
         };
@@ -138,16 +135,16 @@
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0/client",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
-    "react/": "https://esm.sh/react@19.0.0/"
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client?external=react",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="./index.tsx" crossorigin></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { db } from '../firebase';
-import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc, Timestamp, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { Thread } from '../types';
+import { db } from '../firebase.ts';
+import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { Thread } from '../types.ts';
 
 interface ModalProps {
   onClose: () => void;
@@ -17,7 +17,6 @@ const colors = [
   { value: "#34495e", label: "ダーク" }
 ];
 
-// index.html側で定義したグローバル関数を型安全に呼び出すための定義
 declare global {
   interface Window {
     processImage: (file: File, maxDim: number) => Promise<string>;
@@ -57,7 +56,7 @@ export const CreateThreadModal: React.FC<ModalProps & { currentRoom: string, nic
       onClose();
     } catch (e) {
       console.error(e);
-      alert("エラーが発生しました。画像サイズが大きすぎる可能性があります。");
+      alert("エラーが発生しました。");
     } finally {
       setLoading(false);
     }
@@ -167,7 +166,7 @@ export const CreatePostModal: React.FC<ModalProps & { threadId: string, currentR
       onClose();
     } catch (e) {
       console.error(e);
-      alert("エラーが発生しました。画像サイズが大きすぎる可能性があります。");
+      alert("エラーが発生しました。");
     } finally {
       setLoading(false);
     }

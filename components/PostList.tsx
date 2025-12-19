@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { db } from '../firebase';
-import { Thread, Post } from '../types';
+import { db } from '../firebase.ts';
+import { Thread, Post } from '../types.ts';
 
 interface PostListProps {
   thread: Thread;
