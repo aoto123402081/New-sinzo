@@ -1,21 +1,17 @@
+
 {
-  "name": "bord-modernized",
-  "private": true,
-  "version": "0.0.0",
+  "name": "sinzo-bord",
+  "version": "1.0.0",
+  "description": "Modern bulletin board app built with React and Firebase.",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "npx serve ."
   },
   "dependencies": {
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+  "engines": {
+    "node": "18.x"
   }
 }

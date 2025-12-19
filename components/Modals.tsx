@@ -17,48 +17,12 @@ const colors = [
   { value: "#34495e", label: "ダーク" }
 ];
 
-/**
- * 画像をリサイズ・圧縮してBase64文字列に変換する
- * Firestoreの1MB制限を回避するため、canvasを使用してサイズを落とす
- */
-const processImage = (file: File, maxDim: number): Promise<string> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxDim) {
-            height *= maxDim / width;
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width *= maxDim / height;
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          // JPEG形式で品質を0.7に設定して圧縮
-          resolve(canvas.toDataURL('image/jpeg', 0.7));
-        } else {
-          resolve(e.target?.result as string);
-        }
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  });
-};
+// index.html側で定義したグローバル関数を型安全に呼び出すための定義
+declare global {
+  interface Window {
+    processImage: (file: File, maxDim: number) => Promise<string>;
+  }
+}
 
 export const CreateThreadModal: React.FC<ModalProps & { currentRoom: string, nickName: string, userIcon: string, onSuccess: (name: string, icon: string) => void }> = ({ currentRoom, nickName, userIcon, onClose, onSuccess }) => {
   const [name, setName] = useState(nickName);
@@ -118,7 +82,7 @@ export const CreateThreadModal: React.FC<ModalProps & { currentRoom: string, nic
               <div className="flex items-center gap-2">
                 <input type="file" accept="image/*" onChange={async e => {
                   if (e.target.files?.[0]) {
-                    const b64 = await processImage(e.target.files[0], 128);
+                    const b64 = await window.processImage(e.target.files[0], 128);
                     setIcon(b64);
                   }
                 }} className="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
@@ -150,7 +114,7 @@ export const CreateThreadModal: React.FC<ModalProps & { currentRoom: string, nic
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">画像添付</label>
             <input type="file" accept="image/*" onChange={async e => {
               if (e.target.files?.[0]) {
-                const b64 = await processImage(e.target.files[0], 1024);
+                const b64 = await window.processImage(e.target.files[0], 1024);
                 setImage(b64);
               }
             }} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
@@ -228,7 +192,7 @@ export const CreatePostModal: React.FC<ModalProps & { threadId: string, currentR
               <div className="flex items-center gap-2">
                 <input type="file" accept="image/*" onChange={async e => {
                   if (e.target.files?.[0]) {
-                    const b64 = await processImage(e.target.files[0], 128);
+                    const b64 = await window.processImage(e.target.files[0], 128);
                     setIcon(b64);
                   }
                 }} className="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 file:text-slate-700 cursor-pointer" />
@@ -251,7 +215,7 @@ export const CreatePostModal: React.FC<ModalProps & { threadId: string, currentR
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">画像</label>
               <input type="file" accept="image/*" onChange={async e => {
                 if (e.target.files?.[0]) {
-                  const b64 = await processImage(e.target.files[0], 1024);
+                  const b64 = await window.processImage(e.target.files[0], 1024);
                   setImage(b64);
                 }
               }} className="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 file:text-slate-700 cursor-pointer" />
@@ -319,7 +283,7 @@ export const CreateRoomModal: React.FC<ModalProps> = ({ onClose }) => {
               accept="image/*" 
               onChange={async e => {
                 if (e.target.files?.[0]) {
-                  const b64 = await processImage(e.target.files[0], 64);
+                  const b64 = await window.processImage(e.target.files[0], 64);
                   setIcon(b64);
                 }
               }} 
