@@ -5,11 +5,13 @@
   "description": "Modern bulletin board app built with React and Firebase.",
   "type": "module",
   "scripts": {
-    "start": "npx serve ."
+    "build": "echo 'No build step required for ESM-native app'",
+    "start": "serve -s ."
   },
   "dependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "serve": "^14.2.4"
   },
   "engines": {
     "node": "18.x"

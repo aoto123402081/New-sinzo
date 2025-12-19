@@ -27,12 +27,12 @@ const PostList: React.FC<PostListProps> = ({ thread, currentRoom, onBack, onShow
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.split(urlRegex).map((part, i) => {
       if (part.match(urlRegex)) {
-        return <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>;
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="underline opacity-80 hover:opacity-100">{part}</a>;
       }
       const anchorRegex = />>(\d+)/g;
       return part.split(anchorRegex).map((subPart, j) => {
         if (subPart.match(/^\d+$/)) {
-          return <span key={j} className="text-pink-300 font-bold cursor-pointer hover:underline">>>{subPart}</span>;
+          return <span key={j} className="text-yellow-200 font-bold cursor-pointer hover:underline">>>{subPart}</span>;
         }
         return subPart;
       });
@@ -69,48 +69,58 @@ const PostList: React.FC<PostListProps> = ({ thread, currentRoom, onBack, onShow
       </div>
 
       <div className="space-y-6 mb-12" ref={scrollRef}>
-        {posts.map((post, idx) => (
-          <div key={post.id} className="group animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white flex-shrink-0 flex items-center justify-center text-xs font-bold text-slate-500 border border-slate-200 shadow-sm overflow-hidden user-icon-container">
-                {post.icon ? (
-                  <img src={post.icon} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
-                    {post.memberId[0]}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 px-1">
-                  <span className="post-name truncate">{post.memberId}</span>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase">#{post.index || idx + 1}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    {post.created_at?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-                <div 
-                  className="post-card p-4 shadow-sm border border-slate-100 relative"
-                  style={{ borderLeft: post.color && post.color !== '#ffffff' ? `4px solid ${post.color}` : undefined }}
-                >
-                  <p className="whitespace-pre-wrap break-words leading-relaxed text-sm post-body">
-                    {convertText(post.body)}
-                  </p>
-                  {post.image && (
-                    <div className="mt-3">
-                      <img 
-                        src={post.image} 
-                        alt="添付画像" 
-                        onClick={() => onShowImage(post.image!)}
-                        className="rounded-xl max-h-64 cursor-zoom-in hover:opacity-90 transition-opacity border border-white/20" 
-                      />
+        {posts.map((post, idx) => {
+          // 色指定がない、または白の場合はデフォルトの青系にする
+          const isCustomColor = post.color && post.color !== '#ffffff';
+          const cardBg = isCustomColor ? post.color : '#1e88e5';
+          
+          return (
+            <div key={post.id} className="group animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white flex-shrink-0 flex items-center justify-center text-xs font-bold text-slate-500 border border-slate-200 shadow-sm overflow-hidden user-icon-container">
+                  {post.icon ? (
+                    <img src={post.icon} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
+                      {post.memberId[0]}
                     </div>
                   )}
                 </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-xs font-bold text-slate-700 truncate">{post.memberId}</span>
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase">#{post.index || idx + 1}</span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {post.created_at?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div 
+                    className="post-card p-4 shadow-md relative overflow-hidden"
+                    style={{ backgroundColor: cardBg, color: '#ffffff' }}
+                  >
+                    <p className="whitespace-pre-wrap break-words leading-relaxed text-sm relative z-10 font-medium">
+                      {convertText(post.body)}
+                    </p>
+                    {post.image && (
+                      <div className="mt-3 relative z-10">
+                        <img 
+                          src={post.image} 
+                          alt="添付画像" 
+                          onClick={() => onShowImage(post.image!)}
+                          className="rounded-xl max-h-80 cursor-zoom-in hover:opacity-95 transition-opacity border border-white/30 shadow-sm" 
+                        />
+                      </div>
+                    )}
+                    {/* 背景にうっすら装飾 */}
+                    <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none text-2xl font-black">
+                      #{post.index || idx + 1}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

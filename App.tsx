@@ -47,6 +47,8 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // 部屋変更時にリストを空にする（読み込みが混ざるのを防ぐ）
+    setThreads([]);
     const q = query(collection(db, currentRoom), orderBy("created_at", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Thread));
