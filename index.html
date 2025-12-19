@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://picsum.photos/32/32">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        
+        /* ① 角丸・影・背景（見た目の土台） */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f6f8;
+            -webkit-tap-highlight-color: transparent;
+            color: #1e293b;
+        }
+
+        button, input, textarea, select {
+            border-radius: 999px;
+        }
+
+        .card, .thread, .post, .threadItem {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        /* ② 部屋選択ボタン（押してるのが分かる） */
+        .roomBtn {
+            padding: 8px 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .roomBtn.active {
+            background: #2ecc71 !important;
+            color: #fff !important;
+            border-color: #2ecc71 !important;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+
+        /* ③ スレッド一覧（カード化） */
+        .threadTitle {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        /* ④ 投稿表示（読みやすく & 背景色指定） */
+        .post-card {
+            background-color: #1e88e5 !important; /* 指定色（青） */
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .post-name {
+            color: #000000 !important; /* 投稿者名は黒色 */
+            font-weight: 800;
+            font-size: 13px;
+        }
+        .post-body {
+            color: #ffffff !important;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .post-body a {
+            color: #93c5fd !important;
+            text-decoration: underline;
+        }
+
+        /* 入力欄の文字色視認性 */
+        input, textarea, select {
+            color: #1e293b !important;
+            background-color: #ffffff !important;
+        }
+        ::placeholder {
+            color: #94a3b8 !important;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0/client",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
+    "react/": "https://esm.sh/react@19.0.0/"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+</body>
+</html>

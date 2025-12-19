@@ -1,0 +1,7 @@
+{
+  "name": "Bord Modernized",
+  "description": "A modern community bulletin board with real-time updates, room-based discussions, and an elegant card-based UI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
