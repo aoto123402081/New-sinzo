@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -9,17 +8,82 @@
     <link rel="icon" href="https://picsum.photos/32/32">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f5f6f8; -webkit-tap-highlight-color: transparent; color: #1e293b; }
-        .card, .threadItem { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .roomBtn { padding: 8px 14px; background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.2s; border-radius: 999px; font-size: 0.875rem; font-weight: 700; cursor: pointer; }
-        .roomBtn.active { background: #2ecc71 !important; color: #fff !important; border-color: #2ecc71 !important; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); }
-        .post-card { border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: background-color 0.3s ease; }
-        .post-body { color: #ffffff; font-size: 14px; line-height: 1.6; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        input, textarea { outline: none; border: 1px solid #e2e8f0; transition: border-color 0.2s; }
-        input:focus, textarea:focus { border-color: #3b82f6; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f6f8;
+            -webkit-tap-highlight-color: transparent;
+            color: #1e293b;
+        }
+
+        .card, .threadItem {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .roomBtn {
+            padding: 8px 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .roomBtn.active {
+            background: #2ecc71 !important;
+            color: #fff !important;
+            border-color: #2ecc71 !important;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+
+        .post-card {
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: background-color 0.3s ease;
+        }
+        .post-body {
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .post-body a {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        input, textarea, select {
+            color: #1e293b;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
+    
     <script type="importmap">
 {
   "imports": {
@@ -34,18 +98,22 @@
 </head>
 <body>
     <div id="root"></div>
+
     <script type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
         import htm from 'htm';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { 
-            initializeFirestore, collection, query, orderBy, onSnapshot, doc, 
-            addDoc, getDocs, deleteDoc, updateDoc, setDoc, serverTimestamp, increment 
+            initializeFirestore, 
+            collection, query, orderBy, onSnapshot, doc, 
+            addDoc, getDocs, deleteDoc, updateDoc, setDoc, 
+            serverTimestamp, increment 
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const html = htm.bind(React.createElement);
 
+        // --- Firebase Config ---
         const firebaseConfig = {
             apiKey: "AIzaSyC9ygh6HjX5mK1e5ZBnEWnLQCEjRMKIEWA",
             authDomain: "sinzo-3f972.firebaseapp.com",
@@ -55,21 +123,32 @@
             appId: "1:1058985227031:web:2e3a31346805442e10bd52"
         };
         const app = initializeApp(firebaseConfig);
-        const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        const db = initializeFirestore(app, {
+            experimentalForceLongPolling: true,
+            useFetchStreams: false
+        });
 
+        // --- Utils ---
         const processImage = (file, maxDim) => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
+                if (!file) return reject("No file");
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         let { width, height } = img;
-                        if (width > height) { if (width > maxDim) { height *= maxDim / width; width = maxDim; } }
-                        else { if (height > maxDim) { width *= maxDim / height; height = maxDim; } }
+                        if (width > height) {
+                            if (width > maxDim) { height *= maxDim / width; width = maxDim; }
+                        } else {
+                            if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+                        }
                         canvas.width = width; canvas.height = height;
-                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                            ctx.drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.7));
+                        } else resolve(e.target.result);
                     };
                     img.src = e.target.result;
                 };
@@ -78,10 +157,91 @@
         };
 
         const colors = [
-            { value: "#3498db", label: "青" }, { value: "#2ecc71", label: "緑" },
-            { value: "#e74c3c", label: "赤" }, { value: "#9b59b6", label: "紫" },
-            { value: "#f39c12", label: "オレンジ" }, { value: "#34495e", label: "ダーク" }
+            { value: "#3498db", label: "青" },
+            { value: "#2ecc71", label: "緑" },
+            { value: "#e74c3c", label: "赤" },
+            { value: "#9b59b6", label: "紫" },
+            { value: "#f39c12", label: "オレンジ" },
+            { value: "#34495e", label: "ダーク" }
         ];
+
+        // --- Components ---
+
+        const Header = ({ onlineCount, onAdmin, currentRoom, rooms }) => {
+            const mainRooms = [
+                { id: 'threads', label: '通常', icon: '🏠' },
+                { id: 'chat', label: '雑談', icon: '💬' },
+                { id: 'apple', label: 'apple製品', icon: '' },
+                { id: 'question', label: '質問', icon: '🙋' }
+            ];
+            const roomData = mainRooms.find(r => r.id === currentRoom) || rooms.find(r => r.id === currentRoom);
+            
+            let displayLabel = roomData?.label || currentRoom;
+            if (displayLabel.length > 20 || displayLabel.startsWith('data:')) {
+                displayLabel = "カスタムルーム";
+            }
+            const displayIcon = roomData?.icon || '🚪';
+
+            return html`
+                <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl font-bold">B</div>
+                        <div className="hidden sm:block">
+                            <h1 className="text-lg font-bold text-slate-800 leading-tight">Bord</h1>
+                        </div>
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                            <span className="text-sm">${displayIcon}</span>
+                            <span className="text-sm font-bold text-slate-700 max-w-[120px] truncate">${displayLabel}</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2">
+                            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            ${onlineCount}人
+                        </div>
+                        <button onClick=${onAdmin} className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-slate-200">管理</button>
+                    </div>
+                </header>
+            `;
+        };
+
+        const RoomSelector = ({ currentRoom, onSwitch, onAddRoom, rooms }) => {
+            const [showAll, setShowAll] = useState(false);
+            const mainRooms = [
+                { id: 'threads', label: '🏠 通常' },
+                { id: 'chat', label: '💬 雑談' },
+                { id: 'apple', label: ' apple製品' },
+                { id: 'question', label: '🙋 質問' }
+            ];
+            const otherRooms = rooms.filter(r => !mainRooms.map(m => m.id).includes(r.id));
+
+            return html`
+                <div className="mb-6 flex flex-wrap gap-2 items-center">
+                    ${mainRooms.map(room => html`
+                        <button key=${room.id} onClick=${() => onSwitch(room.id)} className=${`roomBtn ${currentRoom === room.id ? 'active' : ''}`}>
+                            ${room.label}
+                        </button>
+                    `)}
+                    <div className="relative">
+                        <button onClick=${() => setShowAll(!showAll)} className=${`roomBtn ${showAll ? 'bg-slate-800 text-white' : ''}`}>
+                            🚪 その他 (${otherRooms.length})
+                        </button>
+                        ${showAll && html`
+                            <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1 max-h-60 overflow-y-auto custom-scrollbar">
+                                ${otherRooms.length === 0 ? html`<div className="px-4 py-3 text-sm text-slate-400">なし</div>` : 
+                                    otherRooms.map(room => html`
+                                        <button key=${room.id} onClick=${() => { onSwitch(room.id); setShowAll(false); }} className=${`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 truncate ${currentRoom === room.id ? 'font-bold text-blue-500 bg-blue-50' : ''}`}>
+                                            #${room.id.substring(0, 15)}${room.id.length > 15 ? '...' : ''}
+                                        </button>
+                                    `)
+                                }
+                            </div>
+                        `}
+                    </div>
+                    <button onClick=${onAddRoom} className="roomBtn bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-100">＋ 部屋作成</button>
+                </div>
+            `;
+        };
 
         const App = () => {
             const [currentRoom, setCurrentRoom] = useState('threads');
@@ -91,9 +251,12 @@
             const [rooms, setRooms] = useState([]);
             const [onlineCount, setOnlineCount] = useState(0);
             const [showImage, setShowImage] = useState(null);
+            
             const [showCreateThread, setShowCreateThread] = useState(false);
             const [showCreatePost, setShowCreatePost] = useState(false);
             const [showCreateRoom, setShowCreateRoom] = useState(false);
+
+            const nickName = localStorage.getItem('nickName') || '名称未設定';
 
             useEffect(() => {
                 return onSnapshot(query(collection(db, "rooms"), orderBy("created_at", "desc")), (snap) => {
@@ -111,15 +274,15 @@
             useEffect(() => {
                 if (!currentThread) return;
                 setPosts([]);
-                return onSnapshot(query(collection(db, currentRoom, currentThread.id, "posts"), orderBy("created_at", "asc")), (snap) => {
-                    setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                });
+                const q = query(collection(db, currentRoom, currentThread.id, "posts"), orderBy("created_at", "asc"));
+                return onSnapshot(q, (snap) => setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
             }, [currentThread, currentRoom]);
 
             useEffect(() => {
                 const id = Math.random().toString(36).slice(2);
                 const ref = doc(db, "online", id);
-                setDoc(ref, { t: serverTimestamp(), name: 'User' });
+                const hb = () => setDoc(ref, { t: serverTimestamp(), name: nickName }, { merge: true });
+                hb(); const itv = setInterval(hb, 20000);
                 const unsub = onSnapshot(collection(db, "online"), (snap) => {
                     const now = Date.now(); let count = 0;
                     snap.forEach(d => {
@@ -128,85 +291,74 @@
                     });
                     setOnlineCount(count);
                 });
-                return () => { unsub(); deleteDoc(ref); };
-            }, []);
-
-            const getRoomLabel = () => {
-                const main = { threads: '通常', chat: '雑談', apple: 'apple', question: '質問' };
-                if (main[currentRoom]) return main[currentRoom];
-                const found = rooms.find(r => r.id === currentRoom);
-                const label = found ? found.id : currentRoom;
-                // Base64チェックと長さ制限
-                if (label.startsWith('data:image') || label.length > 25) return "カスタム";
-                return label;
-            };
+                return () => { clearInterval(itv); unsub(); deleteDoc(ref); };
+            }, [nickName]);
 
             return html`
                 <div className="min-h-screen pb-24">
-                    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl font-bold">B</div>
-                            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-                                <span className="text-sm">🚪</span>
-                                <span className="text-sm font-bold text-slate-700 max-w-[120px] truncate">${getRoomLabel()}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2">
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                ${onlineCount}人
-                            </div>
-                        </div>
-                    </header>
-
+                    <${Header} onlineCount=${onlineCount} rooms=${rooms} currentRoom=${currentRoom} onAdmin=${() => {
+                        const pass = prompt('管理者パスワードを入力してください');
+                        if (pass === '2059') alert('管理者認証成功');
+                    }} />
+                    
                     <main className="max-w-4xl mx-auto px-4 py-6">
-                        <div className="mb-6 flex flex-wrap gap-2 items-center">
-                            ${['threads', 'chat', 'apple', 'question'].map(id => html`
-                                <button key=${id} onClick=${() => { setCurrentRoom(id); setCurrentThread(null); }} className=${`roomBtn ${currentRoom === id ? 'active' : ''}`}>
-                                    ${id === 'threads' ? '🏠 通常' : id === 'chat' ? '💬 雑談' : id === 'apple' ? ' apple' : '🙋 質問'}
-                                </button>
-                            `)}
-                            <button onClick=${() => setShowCreateRoom(true)} className="roomBtn bg-blue-50 text-blue-600 border-blue-100">＋ 部屋作成</button>
-                        </div>
-
+                        <${RoomSelector} currentRoom=${currentRoom} rooms=${rooms} onSwitch=${room => { setCurrentRoom(room); setCurrentThread(null); }} onAddRoom=${() => setShowCreateRoom(true)} />
+                        
                         ${!currentThread ? html`
                             <div className="space-y-4">
-                                ${threads.map(t => html`
-                                    <div key=${t.id} onClick=${() => setCurrentThread(t)} className="bg-white p-5 rounded-2xl border-l-8 cursor-pointer shadow-sm hover:shadow-md animate-fade-in" style=${{ borderLeftColor: t.color || '#1e88e5' }}>
-                                        <h3 className="font-bold text-lg mb-1">${t.title}</h3>
+                                ${threads.length === 0 ? html`
+                                    <div className="bg-white p-12 text-center rounded-3xl border border-dashed border-slate-300 text-slate-400 font-medium">
+                                        まだスレッドがありません
+                                    </div>
+                                ` : threads.map(t => html`
+                                    <div key=${t.id} onClick=${() => setCurrentThread(t)} className="bg-white p-5 rounded-2xl border-l-8 cursor-pointer shadow-sm hover:shadow-md transition-all animate-fade-in" style=${{ borderLeftColor: t.color || '#1e88e5' }}>
+                                        <h3 className="font-bold text-lg mb-1 text-slate-800">${t.title}</h3>
                                         <p className="text-slate-500 text-sm line-clamp-2">${t.detail}</p>
+                                        <div className="mt-3 text-xs text-slate-400 font-bold flex items-center gap-3">
+                                            <span className="bg-slate-100 px-2 py-0.5 rounded">投稿: ${t.postCount || 0}</span>
+                                            <span className="text-slate-600">👤 ${t.memberId}</span>
+                                        </div>
                                     </div>
                                 `)}
                             </div>
                         ` : html`
                             <div className="animate-fade-in">
-                                <div className="bg-white rounded-3xl p-6 border shadow-sm mb-6">
-                                    <button onClick=${() => setCurrentThread(null)} className="mb-4 text-blue-500 font-bold text-sm">← 戻る</button>
+                                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm mb-6">
+                                    <button onClick=${() => setCurrentThread(null)} className="mb-4 text-blue-500 font-bold text-sm hover:underline">← 戻る</button>
                                     <h2 className="text-2xl font-black text-slate-900 mb-2">${currentThread.title}</h2>
-                                    <p className="text-slate-600">${currentThread.detail}</p>
+                                    <p className="text-slate-600 mb-4">${currentThread.detail}</p>
                                 </div>
                                 <div className="space-y-6">
-                                    ${posts.map((post, idx) => html`
-                                        <div key=${post.id} className="flex items-start gap-3">
-                                            <div className="w-10 h-10 rounded-2xl bg-slate-200 flex-shrink-0 overflow-hidden">
-                                                ${post.icon ? html`<img src=${post.icon} className="w-full h-full object-cover" />` : ''}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="mb-1 text-xs font-bold text-slate-400">#${post.index || idx + 1} ${post.memberId}</div>
-                                                <div className="post-card p-4 shadow-md" style=${{ backgroundColor: post.color || '#1e88e5' }}>
-                                                    <p className="whitespace-pre-wrap text-sm post-body">${post.body}</p>
-                                                    ${post.image && html`<img src=${post.image} onClick=${() => setShowImage(post.image)} className="mt-3 rounded-xl max-h-80 cursor-pointer" />`}
+                                    ${posts.map((post, idx) => {
+                                        const cardBg = (post.color && post.color !== '#ffffff') ? post.color : '#1e88e5';
+                                        return html`
+                                            <div key=${post.id} className="flex items-start gap-3">
+                                                <div className="w-10 h-10 rounded-2xl bg-white border flex-shrink-0 overflow-hidden shadow-sm">
+                                                    ${post.icon ? html`<img src=${post.icon} className="w-full h-full object-cover" />` : html`<div className="w-full h-full flex items-center justify-center text-slate-300 font-bold">${post.memberId?.[0]}</div>`}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-bold text-slate-700">${post.memberId}</span>
+                                                        <span className="text-[10px] text-slate-400 font-bold uppercase bg-slate-100 px-1 rounded">#${post.index || idx + 1}</span>
+                                                    </div>
+                                                    <div className="post-card p-4 shadow-md" style=${{ backgroundColor: cardBg }}>
+                                                        <p className="whitespace-pre-wrap break-words text-sm post-body font-medium">${post.body}</p>
+                                                        ${post.image && html`<img src=${post.image} onClick=${() => setShowImage(post.image)} className="mt-3 rounded-xl max-h-80 cursor-zoom-in border border-white/20" />`}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    `)}
+                                        `;
+                                    })}
                                 </div>
                             </div>
                         `}
                     </main>
 
                     <div className="fixed bottom-6 right-6 z-30">
-                        <button onClick=${() => currentThread ? setShowCreatePost(true) : setShowCreateThread(true)} className="bg-blue-500 text-white w-14 h-14 rounded-full shadow-2xl text-2xl hover:scale-110 active:scale-95 transition-all">
+                        <button 
+                            onClick=${() => currentThread ? setShowCreatePost(true) : setShowCreateThread(true)}
+                            className=${`${currentThread ? 'bg-blue-500' : 'bg-green-500'} text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-all`}
+                        >
                             ${currentThread ? '📝' : '📄'}
                         </button>
                     </div>
@@ -214,7 +366,7 @@
                     ${showCreateThread && html`<${CreateThreadModal} room=${currentRoom} onClose=${() => setShowCreateThread(false)} />`}
                     ${showCreatePost && currentThread && html`<${CreatePostModal} room=${currentRoom} threadId=${currentThread.id} onClose=${() => setShowCreatePost(false)} />`}
                     ${showCreateRoom && html`<${CreateRoomModal} onClose=${() => setShowCreateRoom(false)} />`}
-                    ${showImage && html`<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick=${() => setShowImage(null)}><img src=${showImage} className="max-w-full max-h-full rounded-lg" /></div>`}
+                    ${showImage && html`<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 cursor-zoom-out" onClick=${() => setShowImage(null)}><img src=${showImage} className="max-w-full max-h-full rounded-lg" /></div>`}
                 </div>
             `;
         };
@@ -223,26 +375,36 @@
             const [title, setTitle] = useState('');
             const [detail, setDetail] = useState('');
             const [color, setColor] = useState('#3498db');
+            const [loading, setLoading] = useState(false);
+
             const submit = async () => {
-                if (!title.trim()) return;
-                await addDoc(collection(db, room), { 
-                    title, detail, color, memberId: localStorage.getItem('nickName') || '名無し', 
-                    created_at: serverTimestamp(), postCount: 0 
-                });
-                onClose();
+                if (!title.trim()) return alert('タイトルを入力してください');
+                setLoading(true);
+                try {
+                    await addDoc(collection(db, room), {
+                        title, detail, color, 
+                        memberId: localStorage.getItem('nickName') || '名称未設定',
+                        created_at: serverTimestamp(),
+                        postCount: 0
+                    });
+                    onClose();
+                } catch(e) { alert('エラー'); } finally { setLoading(false); }
             };
+
             return html`
-                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl w-full max-w-md p-6">
-                        <h3 className="text-xl font-bold mb-4">スレッド作成</h3>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl">
+                        <h3 className="text-xl font-black mb-4">新規スレッド作成</h3>
                         <input value=${title} onChange=${e => setTitle(e.target.value)} placeholder="タイトル" className="w-full p-3 rounded-xl bg-slate-50 mb-3" />
-                        <textarea value=${detail} onChange=${e => setDetail(e.target.value)} placeholder="内容" className="w-full p-3 rounded-xl bg-slate-50 min-h-[100px] mb-4" />
+                        <textarea value=${detail} onChange=${e => setDetail(e.target.value)} placeholder="詳細内容" className="w-full p-3 rounded-xl bg-slate-50 min-h-[100px] mb-3" />
                         <div className="flex gap-2 mb-4">
-                            ${colors.map(c => html`<button key=${c.value} onClick=${() => setColor(c.value)} className=${`w-8 h-8 rounded-full border-2 ${color === c.value ? 'border-black' : 'border-transparent'}`} style=${{ backgroundColor: c.value }} />`)}
+                            ${colors.map(c => html`
+                                <button key=${c.value} onClick=${() => setColor(c.value)} className=${`w-8 h-8 rounded-full border-2 ${color === c.value ? 'border-slate-800' : 'border-transparent'}`} style=${{ backgroundColor: c.value }} />
+                            `)}
                         </div>
                         <div className="flex gap-2">
-                            <button onClick=${onClose} className="flex-1 py-3 bg-slate-100 rounded-xl font-bold">戻る</button>
-                            <button onClick=${submit} className="flex-1 py-3 bg-blue-500 text-white rounded-xl font-bold">作成</button>
+                            <button onClick=${onClose} className="flex-1 py-3 bg-slate-100 rounded-xl font-bold">キャンセル</button>
+                            <button onClick=${submit} disabled=${loading} className="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold">${loading ? '中...' : '作成'}</button>
                         </div>
                     </div>
                 </div>
@@ -252,30 +414,36 @@
         const CreatePostModal = ({ room, threadId, onClose }) => {
             const [body, setBody] = useState('');
             const [image, setImage] = useState(null);
-            const [color, setColor] = useState('#1e88e5');
+            const [loading, setLoading] = useState(false);
+
             const submit = async () => {
                 if (!body.trim() && !image) return;
-                const snap = await getDocs(collection(db, room, threadId, "posts"));
-                await addDoc(collection(db, room, threadId, "posts"), {
-                    body, image, color, index: snap.size + 1,
-                    memberId: localStorage.getItem('nickName') || '名無し',
-                    created_at: serverTimestamp()
-                });
-                await updateDoc(doc(db, room, threadId), { postCount: increment(1) });
-                onClose();
+                setLoading(true);
+                try {
+                    const snap = await getDocs(collection(db, room, threadId, "posts"));
+                    await addDoc(collection(db, room, threadId, "posts"), {
+                        body, image, index: snap.size + 1,
+                        memberId: localStorage.getItem('nickName') || '名称未設定',
+                        icon: localStorage.getItem('userIcon') || '',
+                        created_at: serverTimestamp()
+                    });
+                    await updateDoc(doc(db, room, threadId), { postCount: increment(1) });
+                    onClose();
+                } catch(e) { alert('エラー'); } finally { setLoading(false); }
             };
+
             return html`
-                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl w-full max-w-md p-6">
-                        <h3 className="text-xl font-bold mb-4">投稿</h3>
-                        <textarea value=${body} onChange=${e => setBody(e.target.value)} placeholder="メッセージ" className="w-full p-3 rounded-xl bg-slate-50 min-h-[120px] mb-3" />
-                        <div className="flex gap-2 mb-4">
-                            ${colors.map(c => html`<button key=${c.value} onClick=${() => setColor(c.value)} className=${`w-8 h-8 rounded-full border-2 ${color === c.value ? 'border-black' : 'border-transparent'}`} style=${{ backgroundColor: c.value }} />`)}
-                        </div>
-                        <input type="file" onChange=${async e => setImage(await processImage(e.target.files[0], 800))} className="mb-4 text-xs" />
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl">
+                        <h3 className="text-xl font-black mb-4">投稿する</h3>
+                        <textarea value=${body} onChange=${e => setBody(e.target.value)} placeholder="内容を入力" className="w-full p-3 rounded-xl bg-slate-50 min-h-[120px] mb-3" />
+                        <input type="file" accept="image/*" onChange=${async e => {
+                            if (e.target.files[0]) setImage(await processImage(e.target.files[0], 1024));
+                        }} className="mb-4 text-xs" />
+                        ${image && html`<img src=${image} className="w-full h-32 object-cover rounded-xl mb-4" />`}
                         <div className="flex gap-2">
-                            <button onClick=${onClose} className="flex-1 py-3 bg-slate-100 rounded-xl font-bold">戻る</button>
-                            <button onClick=${submit} className="flex-1 py-3 bg-blue-500 text-white rounded-xl font-bold">送信</button>
+                            <button onClick=${onClose} className="flex-1 py-3 bg-slate-100 rounded-xl font-bold">キャンセル</button>
+                            <button onClick=${submit} disabled=${loading} className="flex-1 py-3 bg-blue-500 text-white rounded-xl font-bold">${loading ? '中...' : '送信'}</button>
                         </div>
                     </div>
                 </div>
@@ -283,27 +451,36 @@
         };
 
         const CreateRoomModal = ({ onClose }) => {
-            const [id, setId] = useState('');
+            const [roomId, setRoomId] = useState('');
+            const [loading, setLoading] = useState(false);
+
             const submit = async () => {
-                if (!id.trim() || id.length > 20 || id.startsWith('data:')) return alert('IDが無効です');
-                await setDoc(doc(db, "rooms", id), { created_at: serverTimestamp() });
-                onClose();
+                if (!roomId.trim() || roomId.length > 30) return alert('IDが正しくありません');
+                setLoading(true);
+                try {
+                    await setDoc(doc(db, "rooms", roomId), { created_at: serverTimestamp() });
+                    onClose();
+                } catch(e) { alert('エラー'); } finally { setLoading(false); }
             };
+
             return html`
-                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl w-full max-w-sm p-6 text-center">
-                        <h3 className="text-xl font-bold mb-4">新しい部屋</h3>
-                        <input value=${id} onChange=${e => setId(e.target.value)} placeholder="部屋ID (英数字)" className="w-full p-3 rounded-xl bg-slate-50 mb-4" />
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
+                        <h3 className="text-xl font-black mb-2">新規部屋作成</h3>
+                        <p className="text-xs text-slate-400 mb-4">半角英数字のIDを入力してください</p>
+                        <input value=${roomId} onChange=${e => setRoomId(e.target.value)} placeholder="example-room" className="w-full p-3 rounded-xl bg-slate-50 mb-4 font-mono" />
                         <div className="flex gap-2">
                             <button onClick=${onClose} className="flex-1 py-3 bg-slate-100 rounded-xl font-bold">戻る</button>
-                            <button onClick=${submit} className="flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold">作成</button>
+                            <button onClick=${submit} disabled=${loading} className="flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold">作成</button>
                         </div>
                     </div>
                 </div>
             `;
         };
 
-        createRoot(document.getElementById('root')).render(React.createElement(App));
+        const rootElement = document.getElementById('root');
+        const root = createRoot(rootElement);
+        root.render(html`<${App} />`);
     </script>
 </body>
 </html>
